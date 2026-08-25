@@ -11,6 +11,7 @@
 - README is now Simplified-Chinese by default (root `README.md`) with an English peer (`README.en.md`); added a "Features" intro, the official AI Passport site, and the official FoloToy Web Tool flashing link. Repo checker updated for the new root README pair.
 - Power and memory tuning: the calendar pauses its 1 s refresh timer once the idle backlight turns off, so the CPU can drop into a deep light sleep instead of redrawing periodically; log level lowered to INFO and the unused NimBLE broadcaster role disabled to save Flash/RAM. Idle and user interaction remain low-power.
 - Added network provisioning and auto time calibration: a new `Setup` play selects between Wi-Fi auto-join (NVS-stored credentials), a soft-AP + HTTP config page, or a BLE GATT provisioning service; once online, SNTP re-bases and persists the calendar date. Wi-Fi is no longer hardcoded to a single network.
+- Fixed a spurious low-power wakeup-source error: `demo_low_power` now calls `esp_sleep_disable_wakeup_source` only when this session actually enabled the RTC timer wakeup, removing the `E sleep: Incorrect wakeup source (0x4) to disable` that appeared when entering the `Low Power` screen and exiting without sleeping. Verified on-device across three scenarios (enter-and-exit / LIGHT SLEEP / DEEP SLEEP); the light/deep-sleep timer-wakeup paths stay normal and no longer emit that E log.
 
 ## 0.1.0
 
