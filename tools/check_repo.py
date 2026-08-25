@@ -21,9 +21,9 @@ SECRET_PATTERNS = {
 }
 ROOT_MARKDOWN_ALLOWLIST = {
     "AGENTS.md",
-    "AGENTS.zh_CN.md",
+    "AGENTS.en.md",
     "CLAUDE.md",
-    "CLAUDE.zh_CN.md",
+    "CLAUDE.en.md",
     "README.md",
     "README.en.md",
 }
@@ -56,9 +56,9 @@ def text_files() -> list[Path]:
 def check_required_files(errors: list[str]) -> None:
     required = (
         "AGENTS.md",
-        "AGENTS.zh_CN.md",
+        "AGENTS.en.md",
         "CLAUDE.md",
-        "CLAUDE.zh_CN.md",
+        "CLAUDE.en.md",
         "docs/CHANGELOG.md",
         ".github/CONTRIBUTING.md",
         ".github/CODE_OF_CONDUCT.md",
@@ -102,11 +102,11 @@ def check_markdown_links(files: list[Path], errors: list[str]) -> None:
 
 
 def check_document_languages(files: list[Path], errors: list[str]) -> None:
-    """Enforce documentation language pairing.
+    """Enforce documentation language pairing, Simplified-Chinese default.
 
     The root README is Simplified-Chinese by default (README.md) with an English
-    peer (README.en.md). All other Markdown keeps the repository convention of an
-    English default .md paired with a Simplified-Chinese .zh_CN.md.
+    peer (README.en.md). Every other Markdown follows the same convention: the
+    default .md is Simplified-Chinese and is paired with an English .en.md peer.
     """
     markdown = {path.resolve() for path in files if path.suffix.lower() == ".md"}
     readme_zh = (ROOT / "README.md").resolve()
@@ -118,13 +118,13 @@ def check_document_languages(files: list[Path], errors: list[str]) -> None:
         opening = "\n".join(text.splitlines()[:8])
 
         if path.parent != ROOT or name not in ("README.md", "README.en.md"):
-            # Generic convention: English default .md + Simplified Chinese .zh_CN.md.
-            if name.endswith(".zh_CN.md"):
-                default_name = f"{name[:-len('.zh_CN.md')]}.md"
+            # Generic convention: Simplified-Chinese default .md + English .en.md peer.
+            if name.endswith(".en.md"):
+                default_name = f"{name[:-len('.en.md')]}.md"
                 default_path = path.with_name(default_name).resolve()
                 if default_path not in markdown:
                     errors.append(
-                        f"{path.relative_to(ROOT)}: missing English default {default_name}"
+                        f"{path.relative_to(ROOT)}: missing Simplified Chinese default {default_name}"
                     )
                 elif default_name not in opening:
                     errors.append(
@@ -132,23 +132,15 @@ def check_document_languages(files: list[Path], errors: list[str]) -> None:
                     )
                 continue
 
-            chinese_name = f"{path.stem}.zh_CN.md"
-            chinese_path = path.with_name(chinese_name).resolve()
-            if chinese_path not in markdown:
+            english_name = f"{path.stem}.en.md"
+            english_path = path.with_name(english_name).resolve()
+            if english_path not in markdown:
                 errors.append(
-                    f"{path.relative_to(ROOT)}: missing Simplified Chinese peer {chinese_name}"
+                    f"{path.relative_to(ROOT)}: missing English peer {english_name}"
                 )
-            elif chinese_name not in opening:
+            elif english_name not in opening:
                 errors.append(
-                    f"{path.relative_to(ROOT)}: missing top language link to {chinese_name}"
-                )
-
-            english_prose = text.replace("简体中文", "")
-            match = CJK_RE.search(english_prose)
-            if match:
-                line = english_prose.count("\n", 0, match.start()) + 1
-                errors.append(
-                    f"{path.relative_to(ROOT)}:{line}: default Markdown must use English prose"
+                    f"{path.relative_to(ROOT)}: missing top language link to {english_name}"
                 )
             continue
 

@@ -83,4 +83,4 @@ idf.py merge-bin -o build/FoloToy-AI-Passport-full.bin
 
 ## 许可
 
-[MIT](./LICENSE) · 变更记录：[docs/CHANGELOG.zh_CN.md](docs/CHANGELOG.zh_CN.md)
+[MIT](./LICENSE) · 变更记录：[docs/CHANGELOG.md](docs/CHANGELOG.md)

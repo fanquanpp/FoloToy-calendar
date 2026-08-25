@@ -1,57 +1,57 @@
 <p align="right">
-  <a href="AGENTS.zh_CN.md">简体中文</a> · <strong>English</strong>
+  <strong>简体中文</strong> · <a href="AGENTS.en.md">English</a>
 </p>
 
-# Repository Guidelines for AI Agents
+# AI Agent 仓库规范
 
-This file is the only mandatory entry point for AI-assisted work in this repository. Read task-specific documents from the routing table below; do not load every README by default.
+本文是本仓库 AI 辅助工作的唯一必读入口。根据下方路由表读取当前任务所需文档，不要默认加载全部 README。
 
-## Project and safety baseline
+## 项目与安全基线
 
-- Target: ESP32-C3, 8 MB Flash, no PSRAM, ESP-IDF 5.5.3.
-- Preserve existing user changes. Start with `git status --short --branch`; never overwrite or clean unrelated files.
-- Hardware facts follow this priority: schematic/PCB and measured results → `components/bsp/include/bsp_pins.h` → BSP headers and implementation → hardware guide → README/demo code. Report unknown hardware facts instead of guessing.
-- Reusable board logic belongs in `components/bsp`; pages, state machines, animations, and application tasks belong in `main`.
-- LVGL is not thread-safe. Code outside the LVGL task must hold `bsp_lvgl_lock()` while accessing LVGL objects.
-- Button callbacks must stay non-blocking. Audio, storage, networking, and other slow operations belong in worker tasks.
-- A demo must stop every task, timer, callback, and event handler that can access its UI before deleting the screen.
-- Keep testable state machines, protocols, timing, and layout calculations independent from ESP-IDF/LVGL and cover them with host tests.
-- Never commit credentials, device QR secrets, private keys, personal data, or unsanitized logs.
-- Every maintained Markdown document uses English at its default `.md` path and Simplified Chinese in a paired `.zh_CN.md` file (exception: the root `README.md` is Simplified Chinese by default with an English `README.en.md` peer). Keep both versions aligned and retain reciprocal language links.
+- 目标平台：ESP32-C3、8 MB Flash、无 PSRAM、ESP-IDF 5.5.3。
+- 保留用户已有修改。先执行 `git status --short --branch`，不得覆盖或清理无关文件。
+- 硬件事实优先级：原理图/PCB 与实测结果 → `components/bsp/include/bsp_pins.h` → BSP 头文件与实现 → 硬件指南 → README/demo。未知硬件事实必须报告，不得猜测。
+- 可复用板级逻辑放入 `components/bsp`；页面、状态机、动画和应用任务放入 `main`。
+- LVGL 非线程安全。LVGL 任务之外访问 LVGL 对象时必须持有 `bsp_lvgl_lock()`。
+- 按键回调不得阻塞。音频、存储、网络等慢操作必须放入工作任务。
+- demo 删除 screen 前，必须停止所有可能访问其 UI 的任务、定时器、回调和事件处理器。
+- 可测试的状态机、协议、计时和布局计算应与 ESP-IDF/LVGL 解耦，并由 host tests 覆盖。
+- 禁止提交凭证、设备二维码秘密、私钥、个人数据或未脱敏日志。
+- 所有维护中的 Markdown 默认 `.md` 路径为简体中文，英文版本使用配对的 `.en.md` 文件。两种语言必须保持一致并保留互相切换链接。
 
-## Task-specific context routing
+## 按任务加载上下文
 
-| Task | Read before editing |
+| 任务 | 修改前读取 |
 | --- | --- |
-| Any code change | `docs/development/agent-guide.md`, relevant headers and neighboring implementation |
-| BSP, pins, buses, display, audio, battery | `docs/hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.md`, `components/bsp/include/bsp_pins.h` |
-| Demo or menu | `main/demo.h`, `main/main.c`, the nearest `main/demo_*.c` implementation |
-| Build, test, dependencies, partitions | `docs/development/build-and-test.md`, `sdkconfig.defaults`, `partitions.csv` |
-| CI or release | the matching file in `docs/development/CI-*.md` and `.github/workflows/` |
-| Documentation | `docs/contribution/doc-conventions.md`, `docs/INDEX.md` |
-| Commit or PR | `docs/contribution/commit-and-pr.md` |
+| 任意代码修改 | `docs/development/agent-guide.md`、相关头文件和相邻实现 |
+| BSP、引脚、总线、显示、音频、电池 | `docs/hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.md`、`components/bsp/include/bsp_pins.h` |
+| Demo 或菜单 | `main/demo.h`、`main/main.c`、最近的 `main/demo_*.c` 实现 |
+| 构建、测试、依赖、分区 | `docs/development/build-and-test.md`、`sdkconfig.defaults`、`partitions.csv` |
+| CI 或发布 | `docs/development/CI-*.md` 中的对应文件与 `.github/workflows/` |
+| 文档 | `docs/contribution/doc-conventions.md`、`docs/INDEX.md` |
+| Commit 或 PR | `docs/contribution/commit-and-pr.md` |
 
-Use `docs/README.md` for the product overview and `docs/INDEX.md` when a task needs additional documentation.
+产品概览见 `docs/README.md`；需要发现更多文档时读 `docs/INDEX.md`。
 
-## Required validation and delivery
+## 必须执行的验证与交付格式
 
-Run the smallest relevant check while iterating, then run the complete gate before delivery:
+迭代时运行最小相关检查，交付前运行完整门禁：
 
 ```bash
-./tools/validate.sh --static    # repository checks + host tests
-./tools/validate.sh --firmware  # ESP-IDF build + merged-image verification
-./tools/validate.sh             # complete gate
+./tools/validate.sh --static    # 仓库检查 + host tests
+./tools/validate.sh --firmware  # ESP-IDF 构建 + 合并镜像验证
+./tools/validate.sh             # 完整门禁
 ```
 
-The complete gate requires an activated ESP-IDF 5.5.3 environment. Do not describe a successful build as hardware validation. Final delivery must report these fields separately:
+完整门禁要求已激活 ESP-IDF 5.5.3 环境。不得把编译成功描述成硬件验证成功。最终交付必须分别报告：
 
 ```text
 Build: PASS / FAIL / NOT RUN
 Host tests: PASS / FAIL / NOT RUN
 Device tests: PASS / FAIL / NOT RUN
-Unverified: remaining board, instrument, or user checks
+Unverified: 仍需板卡、仪器或用户确认的事项
 ```
 
-Create commits and push only when the user requests them or the active workflow explicitly requires them. Record user-visible changes in `docs/CHANGELOG.md`; internal refactors, CI maintenance, typo fixes, and generated-file refreshes do not require a changelog entry.
+仅在用户请求或当前工作流明确要求时创建 commit 和 push。用户可见变化记录到 `docs/CHANGELOG.md`；内部重构、CI 维护、拼写修复和生成文件刷新无需记录。
 
-Community guidance is in `.github/CONTRIBUTING.md`, `.github/CODE_OF_CONDUCT.md`, `.github/SECURITY.md`, and `.github/SUPPORT.md`.
+社区规范见 `.github/CONTRIBUTING.md`、`.github/CODE_OF_CONDUCT.md`、`.github/SECURITY.md` 与 `.github/SUPPORT.md`。
