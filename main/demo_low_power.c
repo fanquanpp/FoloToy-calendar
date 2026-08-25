@@ -33,6 +33,9 @@ static lv_obj_t *s_mascot;
 static TaskHandle_t s_task;
 static volatile bool s_busy;
 static int s_selected;
+// 本次进入是否已真正 enable 了 RTC timer 唤醒。sleep 任务与退出路径都会读写它,
+// 用于避免“未启用就禁用”触发 esp_sleep_disable_wakeup_source 的 Incorrect 报错。
+static volatile bool s_timer_wake_active;
 static RTC_DATA_ATTR uint32_t s_deep_sleep_magic;
 static RTC_DATA_ATTR uint32_t s_deep_sleep_count;
 
@@ -80,10 +83,15 @@ static void sleep_task(void *arg)
             bsp_display_backlight(0);
 
             esp_err_t err = esp_sleep_enable_timer_wakeup(LIGHT_SLEEP_TIME_US);
+            bool timer_wake_enabled = (err == ESP_OK);
+            if (timer_wake_enabled) s_timer_wake_active = true;
             int64_t before = esp_timer_get_time();
-            if (err == ESP_OK) err = esp_light_sleep_start();
+            if (timer_wake_enabled) err = esp_light_sleep_start();
             int64_t slept_ms = (esp_timer_get_time() - before) / 1000;
-            esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+            if (timer_wake_enabled) {
+                esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+                s_timer_wake_active = false;
+            }
             bsp_display_backlight(100);
 
             char text[128];
@@ -135,6 +143,7 @@ void demo_low_power_enter(void)
     menu_refresh();
     s_mascot = ui_pixel_mascot_create(s_scr, 101, 246);
     s_busy = false;
+    s_timer_wake_active = false;
     if (!s_task && xTaskCreate(sleep_task, "demo_sleep", 3072, NULL, 4, &s_task) != pdPASS) {
         lv_label_set_text(s_status, "Cannot create\nsleep worker");
         ESP_LOGE(TAG, "创建 light-sleep 任务失败");
@@ -150,7 +159,12 @@ void demo_low_power_exit(void)
     }
     s_busy = false;
     bsp_display_backlight(100);
-    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+    // 仅当本次确实启用了 RTC timer 唤醒时,退出才禁用它,避免“未启用就禁用”报
+    // Incorrect wakeup source。若任务在校时被删除且尚未清理,此标志仍为真,可兜底清理。
+    if (s_timer_wake_active) {
+        esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_TIMER);
+        s_timer_wake_active = false;
+    }
     if (s_scr) {
         lv_obj_delete(s_scr);
         s_scr = NULL;
