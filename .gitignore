@@ -1,0 +1,30 @@
+# --- 构建产物 ---
+build/
+cmake-build-*/
+sdkconfig
+sdkconfig.old
+sdkconfig.defaults.esp32c3
+managed_components/
+
+# --- IDE / 编辑器 ---
+.vscode/
+.idea/
+.clangd
+*.swp
+*~
+
+# --- 系统与临时文件 ---
+.DS_Store
+Thumbs.db
+*.tmp
+
+# --- Python 工具链 ---
+__pycache__/
+*.pyc
+
+# --- 本地下载的官方源码/组件参考，仅作参考，不纳入本仓库 ---
+/ai-passport-main/
+/esp-idf-master/
+/esp-idf-v6.0.2/
+/esp32-wifi-lib-e0befaa/
+/esp32-wifi-lib-e0befaa.zip
