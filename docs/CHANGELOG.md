@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- Power and memory tuning: the calendar pauses its 1 s refresh timer once the idle backlight turns off, so the CPU can drop into a deep light sleep instead of redrawing periodically; log level lowered to INFO and the unused NimBLE broadcaster role disabled to save Flash/RAM. Idle and user interaction remain low-power.
 - Added network provisioning and auto time calibration: a new `Setup` play selects between Wi-Fi auto-join (NVS-stored credentials), a soft-AP + HTTP config page, or a BLE GATT provisioning service; once online, SNTP re-bases and persists the calendar date. Wi-Fi is no longer hardcoded to a single network.
 
 ## 0.1.0

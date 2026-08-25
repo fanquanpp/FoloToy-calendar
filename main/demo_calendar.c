@@ -286,7 +286,10 @@ static void tick(lv_timer_t *t)
     s_idle_secs++;
     if (s_idle_secs == IDLE_BL_OFF_SECS) {           // 仅一次,避免反复写背光
         bsp_display_backlight(0);
-        ESP_LOGI(TAG, "空闲 %us,背光已熄灭", (unsigned)IDLE_BL_OFF_SECS);
+        // 熄屏后即暂停本定时器:不再周期重绘/落盘,让 esp_pm 能进入深度 light sleep,
+        // 把空闲功耗压到读取状态的最低档。有按键(wake_display)才恢复并补绘。
+        lv_timer_pause(s_timer);
+        ESP_LOGI(TAG, "空闲 %us,背光熄灭,已暂停刷新定时器", (unsigned)IDLE_BL_OFF_SECS);
     }
 
     if (s_idle_secs % (TODAY_REFRESH_MS / 1000) == 0) {
@@ -299,10 +302,16 @@ static void tick(lv_timer_t *t)
     }
 }
 
-// 任意按键都视为活跃:重置空闲计时并把背光点亮。
+// 任意按键都视为活跃:重置空闲计时、恢复(若已暂停)空闲刷定时器并把背光点亮。
 static void wake_display(void)
 {
     s_idle_secs = 0;
+    s_last_persist = 0;
+    if (s_timer && lv_timer_get_paused(s_timer)) {
+        lv_timer_resume(s_timer);                    // 恢复刷新,并补一次“今天/倒计时”重算
+        refresh_today();
+        render_view();
+    }
     bsp_display_backlight(100);
 }
 
