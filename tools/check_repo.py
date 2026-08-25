@@ -25,7 +25,7 @@ ROOT_MARKDOWN_ALLOWLIST = {
     "CLAUDE.md",
     "CLAUDE.zh_CN.md",
     "README.md",
-    "README.zh_CN.md",
+    "README.en.md",
 }
 
 
@@ -102,45 +102,76 @@ def check_markdown_links(files: list[Path], errors: list[str]) -> None:
 
 
 def check_document_languages(files: list[Path], errors: list[str]) -> None:
-    """Require an English default and a linked Simplified Chinese peer."""
+    """Enforce documentation language pairing.
+
+    The root README is Simplified-Chinese by default (README.md) with an English
+    peer (README.en.md). All other Markdown keeps the repository convention of an
+    English default .md paired with a Simplified-Chinese .zh_CN.md.
+    """
     markdown = {path.resolve() for path in files if path.suffix.lower() == ".md"}
+    readme_zh = (ROOT / "README.md").resolve()
+    readme_en = (ROOT / "README.en.md").resolve()
 
     for path in sorted(markdown):
         name = path.name
         text = path.read_text(encoding="utf-8")
         opening = "\n".join(text.splitlines()[:8])
 
-        if name.endswith(".zh_CN.md"):
-            default_name = f"{name[:-len('.zh_CN.md')]}.md"
-            default_path = path.with_name(default_name).resolve()
-            if default_path not in markdown:
+        if path.parent != ROOT or name not in ("README.md", "README.en.md"):
+            # Generic convention: English default .md + Simplified Chinese .zh_CN.md.
+            if name.endswith(".zh_CN.md"):
+                default_name = f"{name[:-len('.zh_CN.md')]}.md"
+                default_path = path.with_name(default_name).resolve()
+                if default_path not in markdown:
+                    errors.append(
+                        f"{path.relative_to(ROOT)}: missing English default {default_name}"
+                    )
+                elif default_name not in opening:
+                    errors.append(
+                        f"{path.relative_to(ROOT)}: missing top language link to {default_name}"
+                    )
+                continue
+
+            chinese_name = f"{path.stem}.zh_CN.md"
+            chinese_path = path.with_name(chinese_name).resolve()
+            if chinese_path not in markdown:
                 errors.append(
-                    f"{path.relative_to(ROOT)}: missing English default {default_name}"
+                    f"{path.relative_to(ROOT)}: missing Simplified Chinese peer {chinese_name}"
                 )
-            elif default_name not in opening:
+            elif chinese_name not in opening:
                 errors.append(
-                    f"{path.relative_to(ROOT)}: missing top language link to {default_name}"
+                    f"{path.relative_to(ROOT)}: missing top language link to {chinese_name}"
+                )
+
+            english_prose = text.replace("简体中文", "")
+            match = CJK_RE.search(english_prose)
+            if match:
+                line = english_prose.count("\n", 0, match.start()) + 1
+                errors.append(
+                    f"{path.relative_to(ROOT)}:{line}: default Markdown must use English prose"
                 )
             continue
 
-        chinese_name = f"{path.stem}.zh_CN.md"
-        chinese_path = path.with_name(chinese_name).resolve()
-        if chinese_path not in markdown:
+        # Root README pair: Simplified-Chinese default (README.md) + English peer
+        # (README.en.md). Both must link to each other; the English peer body must
+        # stay English-only so the default becomes Chinese.
+        peer = readme_en if path.resolve() == readme_zh else readme_zh
+        peer_name = peer.name
+        if peer not in markdown:
             errors.append(
-                f"{path.relative_to(ROOT)}: missing Simplified Chinese peer {chinese_name}"
+                f"{path.relative_to(ROOT)}: missing paired README {peer_name}"
             )
-        elif chinese_name not in opening:
+            continue
+        if peer_name not in opening:
             errors.append(
-                f"{path.relative_to(ROOT)}: missing top language link to {chinese_name}"
+                f"{path.relative_to(ROOT)}: missing top language link to {peer_name}"
             )
-
-        english_prose = text.replace("简体中文", "")
-        match = CJK_RE.search(english_prose)
-        if match:
-            line = english_prose.count("\n", 0, match.start()) + 1
-            errors.append(
-                f"{path.relative_to(ROOT)}:{line}: default Markdown must use English prose"
-            )
+        if path.resolve() == readme_en:
+            body = "\n".join(text.splitlines()[2:])
+            if CJK_RE.search(body):
+                errors.append(
+                    f"{path.relative_to(ROOT)}: README.en.md body must use English prose"
+                )
 
 
 def check_action_pins(errors: list[str]) -> None:

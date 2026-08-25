@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- README 默认改为简体中文（根目录 `README.md`），英文版本为配对的 `README.en.md`；新增"功能简介"，并补充 AI Passport 官网与官方 FoloToy Web Tool 刷机工具链接。仓库检查脚本同步适配新的根 README 语言配对。
 - 内存与能耗调优：日历页在空闲熄背光后即暂停 1 秒刷新定时器，使 CPU 进入深度 light sleep，而不是周期重绘；日志级别降至 INFO、关闭未用的 NimBLE broadcaster 角色以节省 Flash/内存。待机与交互均保持低功耗。
 - 新增联网配网与自动校时：新的 `Setup` 玩法可选 Wi-Fi 自动连接（NVS 存储凭证）、SoftAP + HTTP 配置页、或 BLE GATT 配网服务；联网成功后由 SNTP 重置并落盘日历基准日期。Wi-Fi 不再硬编码为单一网络。
 
