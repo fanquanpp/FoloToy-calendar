@@ -1,6 +1,7 @@
 // tests/test_calendar_logic.c —— 公历日期纯逻辑宿主单元测试。
 // 由 validate.sh --static 编译为本地可执行文件并运行(与 ui_pixel 测试同理)。
 #include <assert.h>
+#include <stddef.h>
 #include <stdint.h>
 #include "calendar_logic.h"
 
