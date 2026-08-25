@@ -71,6 +71,9 @@ static bool s_wifi_inited;
 static bool s_wifi_started;
 static httpd_handle_t  s_httpd;
 
+// 见文件末尾:创建 WiFi netif 前须先初始化默认事件循环/netif 底座,否则 create_default 崩溃。
+static void net_platform_init(void);
+
 // ---------- BLE 资源句柄 ----------
 static SemaphoreHandle_t s_nimble_stopped;
 static bool s_nimble_inited;
@@ -263,6 +266,7 @@ esp_err_t net_sta_start(void)
     esp_err_t err;
     if (s_state == NET_STA_CONNECTING || s_state == NET_STA_ONLINE) return ESP_OK;
     wifi_teardown();
+    net_platform_init();          // 先建事件循环/netif 底座,否则 create_default 崩溃
     tz_load();
 
     // 已存在 STA netif 则跳过重开(示例沿用 demo_radio 的初始化约定)。
@@ -338,6 +342,7 @@ esp_err_t net_softap_start(void)
 {
     esp_err_t err;
     wifi_teardown();
+    net_platform_init();          // 先建事件循环/netif 底座,否则 create_default 崩溃
     tz_load();
 
     s_ap_netif = esp_netif_create_default_wifi_ap();
@@ -527,6 +532,20 @@ void net_ble_stop(void)
     if (!s_nimble_inited && s_nimble_stopped) { vSemaphoreDelete(s_nimble_stopped); s_nimble_stopped = NULL; }
     s_nimble_advertising = false;
     if (s_state == NET_BLE) s_state = NET_IDLE;
+}
+
+// ---------- 平台网络底座(幂等) ----------
+// WiFi/netif 依赖系统默认事件循环与 netif 初始化。若未初始化,
+// esp_netif_create_default_wifi_*() 内部注册默认处理器时会返回
+// ESP_ERR_INVALID_STATE(0x103),被 ESP_ERROR_CHECK 触发 assert 崩溃
+// (实测进 Setup 按 OK 启动 WiFi 即崩)。此处做一次、忽略"已存在"。
+static void net_platform_init(void)
+{
+    static bool done = false;
+    if (done) return;
+    esp_netif_init();                // 重复调用返回 INVALID_STATE,忽略
+    esp_event_loop_create_default(); // 已存在同样返回 INVALID_STATE,忽略
+    done = true;
 }
 
 void net_stop_all(void)
