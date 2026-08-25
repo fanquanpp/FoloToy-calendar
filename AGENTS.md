@@ -31,7 +31,7 @@ This file is the only mandatory entry point for AI-assisted work in this reposit
 | Documentation | `docs/contribution/doc-conventions.md`, `docs/INDEX.md` |
 | Commit or PR | `docs/contribution/commit-and-pr.md` |
 
-Use `docs/README.md` for the product overview and `docs/INDEX.md` when a task needs additional documentation. Fork-specific workflow is in `docs/fork-guide.md` and is not required for ordinary upstream development.
+Use `docs/README.md` for the product overview and `docs/INDEX.md` when a task needs additional documentation.
 
 ## Required validation and delivery
 

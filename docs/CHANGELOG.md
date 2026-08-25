@@ -6,6 +6,7 @@
 
 ## Unreleased
 
+- Repository cleanup: removed upstream-only artifacts (the `skills/` directory, `docs/software-design/`, `docs/brand-and-product*`, the `fork-guide`, the `sync-main.yml` workflow, and its `CI-sync-main` doc) to keep the tracked tree lean for this personal calendar firmware; updated the affected links and indexes and generalized the `.gitignore` reference-directory patterns.
 - README is now Simplified-Chinese by default (root `README.md`) with an English peer (`README.en.md`); added a "Features" intro, the official AI Passport site, and the official FoloToy Web Tool flashing link. Repo checker updated for the new root README pair.
 - Power and memory tuning: the calendar pauses its 1 s refresh timer once the idle backlight turns off, so the CPU can drop into a deep light sleep instead of redrawing periodically; log level lowered to INFO and the unused NimBLE broadcaster role disabled to save Flash/RAM. Idle and user interaction remain low-power.
 - Added network provisioning and auto time calibration: a new `Setup` play selects between Wi-Fi auto-join (NVS-stored credentials), a soft-AP + HTTP config page, or a BLE GATT provisioning service; once online, SNTP re-bases and persists the calendar date. Wi-Fi is no longer hardcoded to a single network.

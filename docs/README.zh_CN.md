@@ -109,10 +109,9 @@ LICENSE                  仓库许可证
 
 ## 文档索引
 
-- [`docs/INDEX.zh_CN.md`](INDEX.zh_CN.md) — 全部文档索引（协作规范、工程规范、fork 工作流、软硬件设计）。
+- [`docs/INDEX.zh_CN.md`](INDEX.zh_CN.md) — 全部文档索引（协作规范、工程规范、软硬件设计）。
 - [`docs/development/agent-guide.zh_CN.md`](development/agent-guide.zh_CN.md) — AI 开发工作流（上下文建立、事实来源优先级、BSP 边界、运行时规则、交付格式）。
 - [`docs/hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.zh_CN.md`](hardware-design/AI_HARDWARE_DEVELOPMENT_GUIDE.zh_CN.md) — 硬件开发指南（引脚表、验收矩阵、故障速查）。
 - [`AGENTS.zh_CN.md`](../AGENTS.zh_CN.md) — AI 协作规范入口。
-- [`docs/fork-guide.zh_CN.md`](fork-guide.zh_CN.md) — fork 工作流。
 
 > 注：本 README 只描述产品与仓库，不含给 AI 的执行说明；AI 开始开发前请先读根目录 `AGENTS.zh_CN.md`，再按任务路由读取相关文档。

@@ -23,8 +23,7 @@ __pycache__/
 *.pyc
 
 # --- 本地下载的官方源码/组件参考，仅作参考，不纳入本仓库 ---
-/ai-passport-main/
-/esp-idf-master/
-/esp-idf-v6.0.2/
-/esp32-wifi-lib-e0befaa/
-/esp32-wifi-lib-e0befaa.zip
+/ai-passport-*/
+/esp-idf-*/
+/esp32-wifi-lib-*/
+/esp32-wifi-lib-*.zip
