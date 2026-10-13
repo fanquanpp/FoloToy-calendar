@@ -3,11 +3,9 @@
 </p>
 
 # FoloToy AI Passport · 日历玩法固件
-
 面向 **FoloToy AI Passport**（ESP32-C3 / 8 MB Flash / 无 PSRAM）的**日历玩法固件**，基于官方 [folotoy/ai-passport](https://github.com/folotoy/ai-passport) 项目开发。版本 **0.1.0**。
 
 ## 功能简介
-
 一个安静、低功耗的桌面日历：
 
 - **公历月历网格**：6 行 × 7 列，沿用项目的像素风 UI。
@@ -19,12 +17,11 @@
 - **低功耗**：空闲 30 秒自动熄背光并进入深度低功耗，任意按键重新点亮。
 
 ## 直接刷入
-
 可安装文件为 `build/FoloToy-AI-Passport-full.bin`（合并镜像，约 1.5 MB）。
 
 使用官方 **FoloToy Web Tool** 刷机（浏览器内 WebSerial 刷入，地址设为 `0x0`）：
 
-▶ 打开官方刷机工具：<https://tool.folotoy.cn/>
+ 打开官方刷机工具：<https://tool.folotoy.cn/>
 
 选择固件写入后重启设备，菜单中即出现日历玩法。
 
@@ -36,13 +33,11 @@ idf.py -p PORT flash
 > 该 `.bin` 也会由自动固件构建工作流（tag 推送）作为 Release 附件发布。
 
 ## 官方资源
-
 - 官网 / 产品页：<https://ai-passport.folotoy.cn/>
 - 官方刷机工具：<https://tool.folotoy.cn/>
 - 官方文档：<https://docs.folotoy.com/>
 
 ## 联网与自动校时
-
 通过 `Setup` 玩法选择设备的联网方式，**不与某一个固定网络绑定**：
 
 - **Wi-Fi 自动连接**：连接设备中已保存的凭证（存储在 NVS）。
@@ -52,7 +47,6 @@ idf.py -p PORT flash
 联网成功后，SNTP 拉取真实时间，日历随之重置基准日期并落盘保存——校准结果跨重启延续，且**每个用户都使用自己的 Wi-Fi**。
 
 ## 按键操作
-
 | 按键 | 动作 |
 | --- | --- |
 | 上 / 下 短按 | 上一个月 / 下一个月 |
@@ -64,7 +58,6 @@ idf.py -p PORT flash
 | OK 长按 | 返回菜单 |
 
 ## 构建
-
 需要 ESP-IDF **5.5.3**，目标芯片 `esp32c3`。
 
 ```bash
@@ -82,5 +75,4 @@ idf.py merge-bin -o build/FoloToy-AI-Passport-full.bin
 ```
 
 ## 许可
-
 [MIT](./LICENSE) · 变更记录：[docs/CHANGELOG.md](docs/CHANGELOG.md)
